@@ -4,6 +4,8 @@ import os
 import requests
 import xarray as xr
 
+LOG_FMT = "%(levelname)s %(asctime)s - %(message)s"
+logging.basicConfig(level=logging.DEBUG, format=LOG_FMT)
 logger = logging.getLogger()
 
 
@@ -33,7 +35,12 @@ def download_input():
         except Exception as exc:
             logger.error('Unable to save file: %s, exception: %s', fn, exc)
             return None
-        else:
-            logger.debug('%s already downloaded', url)
+    else:
+        logger.debug('%s already downloaded', url)
 
-        return fn
+    return fn
+
+
+if __name__ == '__main__':
+
+    download_input()
