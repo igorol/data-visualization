@@ -70,13 +70,23 @@ def make_plots(fn, animated_gif='giss_histogram.gif',
     num_hot_points = 0.
 
     # plot code
+    fn = download_input()
+    ds = xr.open_dataset(fn)
     d0 = datetime(1850, 1, 1)
+
+    if start == 'start':
+        start = d0
+    else:
+        start = datetime.strptime(start, '%Y%m')
+    if end == 'end':
+        end = d0 + relativedelta(months=ds.coords['time'].size)
+    else:
+        end = datetime.strptime(end, '%Y%m')
+
     start_idx = 12 * relativedelta(start, d0).years +\
         relativedelta(start, d0).months
     end_idx = 12 * relativedelta(end, d0).years +\
         relativedelta(end, d0).months
-    fn = download_input()
-    ds = xr.open_dataset(fn)
 
     for t in range(start_idx, end_idx):
         plt.close('all')
@@ -91,7 +101,7 @@ def make_plots(fn, animated_gif='giss_histogram.gif',
         data = data[~np.isnan(data)]
 
         # plot
-        n, bins, patches = plt.hist(data, n_bins, facecolor='white',
+        n, bins, patches = plt.hist(data, n_bins, facecolor='dimgray',
                                     density=1, zorder=1)
 
         # plot the vertical lines for mean, median and right/left limits
@@ -157,8 +167,9 @@ def make_plots(fn, animated_gif='giss_histogram.gif',
         # plt.text(right_line + 1.4, 0.55, '{0:.2f}%'.format(fraction_hot),
         # color='orangered')
         out_name = 'plot_{0:07d}.png'.format(t)
-        plt.figimage(wallpaper, 0, 0, alpha=0.9, zorder=0)
-        plt.savefig('{}/{}'.format(out_dir, out_name), transparent=True)
+        plt.figimage(wallpaper, 0, 0, alpha=0.9, zorder=0, resize=(800, 600))
+        plt.savefig('{}/{}'.format(out_dir, out_name), transparent=True,
+                    dpi=80, rasterized=True)
         # break
 
     # anim stuff
@@ -177,5 +188,5 @@ def make_plots(fn, animated_gif='giss_histogram.gif',
 if __name__ == '__main__':
 
     fn = download_input()
-    make_plots(fn, animated_gif='giss_histogram.gif',
-               start='190001', end='201801')
+    make_plots(fn, animated_gif='histogram.gif',
+               start='196801', end='201806')
