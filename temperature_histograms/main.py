@@ -51,8 +51,6 @@ def make_plots(fn, animated_gif='giss_histogram.gif',
                start='185001', end='201801'):
     """Create Histograms plot."""
 
-    start = datetime.strptime(start, '%Y%m')
-    end = datetime.strptime(end, '%Y%m')
     # plot parameters
     n_bins = 400
     left_line = -2.5
@@ -66,8 +64,8 @@ def make_plots(fn, animated_gif='giss_histogram.gif',
         os.makedirs(out_dir)
     for file in os.scandir(out_dir):
         os.unlink(file)
-    num_cold_points = 0.
-    num_hot_points = 0.
+    # num_cold_points = 0.
+    # num_hot_points = 0.
 
     # plot code
     fn = download_input()
@@ -176,7 +174,7 @@ def make_plots(fn, animated_gif='giss_histogram.gif',
     if animated_gif:
         logger.info('Generating animated gif %s', animated_gif)
         try:
-            cmd = 'convert -delay 10 -loop 0 '\
+            cmd = 'convert -delay 10 -loop 0 -geometry 680x420 '\
                 '{0}/*png {1}'.format(out_dir, animated_gif)
             os.system(cmd)
         except Exception as exc:
@@ -189,4 +187,4 @@ if __name__ == '__main__':
 
     fn = download_input()
     make_plots(fn, animated_gif='histogram.gif',
-               start='196801', end='201806')
+               start='196801', end='196812')
