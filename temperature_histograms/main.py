@@ -2,7 +2,8 @@
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 import logging
-from matplotlib.patches import Rectangle
+from matplotlib.font_manager import FontProperties
+from matplotlib.patches import Rectangle, Shadow
 import matplotlib.pyplot as plt
 import numpy as np
 import os
@@ -57,6 +58,8 @@ def make_plots(fn, animated_gif='giss_histogram.gif',
     right_line = 2.5
     min_val = -6
     max_val = 6
+    cold_color = 'royalblue'
+    hot_color = 'orangered'
     out_dir = './pngs'
     wallpaper = imread('earth.jpg')
 
@@ -64,11 +67,12 @@ def make_plots(fn, animated_gif='giss_histogram.gif',
         os.makedirs(out_dir)
     for file in os.scandir(out_dir):
         os.unlink(file)
-    # num_cold_points = 0.
-    # num_hot_points = 0.
+    num_cold_points = 0.
+    num_hot_points = 0.
+    font = FontProperties()
+    font.set_weight('bold')
 
     # plot code
-    fn = download_input()
     ds = xr.open_dataset(fn)
     d0 = datetime(1850, 1, 1)
 
@@ -108,7 +112,7 @@ def make_plots(fn, animated_gif='giss_histogram.gif',
         plt.axvline(x=right_line, color='white', linestyle='--',
                     linewidth=0.5)
         plt.axvline(x=np.mean(data), color='orange', linestyle='-',
-                    linewidth=4)
+                    linewidth=4, label='Mean')
 
         # Color under the histogram before `left_line` and after `right_line`
         for index, item in enumerate(zip(bins[:-1], n)):
@@ -119,7 +123,7 @@ def make_plots(fn, animated_gif='giss_histogram.gif',
                     width = left_line - bins[index]
                 xy = (item[0], 0)
                 box = Rectangle(xy, width, height, linewidth=1,
-                                edgecolor='royalblue', facecolor='royalblue')
+                                edgecolor=cold_color, facecolor=cold_color)
                 currentAxis = plt.gca()
                 currentAxis.add_patch(box)
 
@@ -131,7 +135,7 @@ def make_plots(fn, animated_gif='giss_histogram.gif',
                     xy = (item[0], 0)
 
                 box = Rectangle(xy, width, height, linewidth=1,
-                                edgecolor='orangered', facecolor='orangered')
+                                edgecolor=hot_color, facecolor=hot_color)
                 currentAxis = plt.gca()
                 currentAxis.add_patch(box)
 
@@ -145,27 +149,44 @@ def make_plots(fn, animated_gif='giss_histogram.gif',
         plt.xlabel('Temperature Anomalies ($^\circ$C)')
         title = 'Monthly Temp Histogram - Data: Berkley Earth'
         plt.title(title)
-        font = {'fontname': 'Helvetica'}
         plt.text(min_val + 0.75, 0.9, month.strftime('%Y'),
-                 weight='bold', fontsize=24, **font)
+                 weight='bold', fontsize=24)
         plt.text(min_val + 0.1, 0.9, month.strftime('%b'),
-                 fontsize=10, **font)
+                 fontsize=10)
 
-        # counting and ploting # of data points
-        # num_cold_points += data[np.where(data < left_line)].shape[0]
-        # num_hot_points += data[np.where(data > right_line)].shape[0]
-        # fraction_cold = num_cold_points / data.shape[0]
-        # fraction_hot = num_hot_points / data.shape[0]
-        # plt.text(min_val + 0.4, 0.6, '# of data points',
-        #          color='royalblue')
-        # plt.text(min_val + 1.4, 0.55, '{0:.2f}%'.format(fraction_cold),
-        # color='royalblue')
-        # plt.text(right_line + 0.4, 0.6, '# of data points',
-        #          color='orangered')
-        # plt.text(right_line + 1.4, 0.55, '{0:.2f}%'.format(fraction_hot),
-        # color='orangered')
+        # counting and ploting frequency bars
+        num_cold_points += data[np.where(data < left_line)].shape[0]
+        num_hot_points += data[np.where(data > right_line)].shape[0]
+        fraction_cold = num_cold_points / data.shape[0]
+        fraction_hot = num_hot_points / data.shape[0]
+        cold_bar = Rectangle((-5, 0), 0.75, fraction_cold/100, linewidth=1,
+                             edgecolor='white', facecolor=cold_color,
+                             zorder=1)
+        currentAxis = plt.gca()
+        currentAxis.add_patch(cold_bar)
+
+        hot_bar = Rectangle((4, 0), 0.75, fraction_hot/100, linewidth=1,
+                            edgecolor='white', facecolor=hot_color,
+                            zorder=1)
+        currentAxis = plt.gca()
+        currentAxis.add_patch(hot_bar)
+        plt.text(min_val + 0.1, fraction_cold/100 + 0.12,
+                 'Cold Events \nFrequency', fontsize=14,
+                 color=cold_color, weight='bold')
+        plt.text(min_val + 0.1, fraction_cold/100 + 0.04,
+                 '{0:.2f}%'.format(fraction_cold), fontsize=14,
+                 color=cold_color, weight='bold')
+
+        plt.text(right_line + 0.1, fraction_hot/100 + 0.12,
+                 'Hot Events \nFrequency', fontsize=14,
+                 color=hot_color, weight='bold')
+        plt.text(right_line + 0.1, fraction_hot/100 + 0.04,
+                 '{0:.2f}%'.format(fraction_hot), fontsize=14,
+                 color=hot_color, weight='bold')
+
         out_name = 'plot_{0:07d}.png'.format(t)
         plt.figimage(wallpaper, 0, 0, alpha=0.9, zorder=0, resize=(800, 600))
+        plt.legend(loc='upper right', frameon=False)
         plt.savefig('{}/{}'.format(out_dir, out_name), transparent=True,
                     dpi=80, rasterized=True)
         # break
@@ -187,4 +208,4 @@ if __name__ == '__main__':
 
     fn = download_input()
     make_plots(fn, animated_gif='histogram.gif',
-               start='196801', end='196812')
+               start='196901', end='end')
