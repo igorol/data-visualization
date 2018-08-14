@@ -12,7 +12,7 @@ from scipy.misc import imread
 import xarray as xr
 
 LOG_FMT = "%(levelname)s %(asctime)s - %(message)s"
-logging.basicConfig(level=logging.DEBUG, format=LOG_FMT)
+logging.basicConfig(level=logging.INFO, format=LOG_FMT)
 logger = logging.getLogger()
 
 
@@ -158,7 +158,10 @@ def make_plots(fn, animated_gif='histogram.gif', start='185001', end='201801'):
 
         hot_patch = Patch(color=hot_color, label='Warm Events')
         cold_patch = Patch(color=cold_color, label='Cold Events')
-        plt.legend(handles=[hot_patch, cold_patch], loc='upper right')
+        mean_patch = Patch(color='orange', label='Mean')
+
+        plt.legend(handles=[hot_patch, cold_patch, mean_patch],
+                   loc='upper right')
 
         plt.axes([.09, .31, .3, .3], facecolor='k')
         plt.pie(pie_slices, colors=pie_colors,
