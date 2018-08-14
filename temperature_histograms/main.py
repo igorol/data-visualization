@@ -177,11 +177,9 @@ def make_plots(fn, animated_gif='histogram.gif', start='185001', end='201801'):
     # anim stuff
     if animated_gif:
         logger.info('Generating animated gif %s', animated_gif)
-        num_imgs = end_idx - start_idx
         try:
-            cmd = 'convert -delay 10 -loop 0 -duplicate 24,{0}'\
-                '-geometry 680x420 {1}/*jpg {2}'.format(num_imgs, out_dir,
-                                                        animated_gif)
+            cmd = 'convert -delay 10 -loop 0 -geometry 680x420 '\
+                '{0}/*jpg {1}'.format(out_dir, animated_gif)
             os.system(cmd)
         except Exception as exc:
             logger.error('Unable to generate gif. Exception = %s', exc)
