@@ -143,7 +143,7 @@ def make_plots(fn, animated_gif='histogram.gif', start='185001', end='201801'):
         # some labeling
         plt.ylabel('Frequency of ocurrence')
         plt.xlabel('Temperature Anomalies ($^\circ$C)')
-        title = 'Monthly Temp Histogram \n Data: Berkley Earth'
+        title = 'Monthly Temp Histogram \n Data: Berkeley Earth'
         plt.title(title)
         plt.text(min_val + 0.8, 0.9, month.strftime('%Y'),
                  weight='bold', fontsize=24)
