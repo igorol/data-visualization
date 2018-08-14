@@ -178,7 +178,7 @@ def make_plots(fn, animated_gif='histogram.gif', start='185001', end='201801'):
     if animated_gif:
         logger.info('Generating animated gif %s', animated_gif)
         try:
-            cmd = 'convert -delay 10 -loop 0 -geometry 680x420 -quality 80%'\
+            cmd = 'convert -delay 10 -loop 0 -geometry 680x420 -quality 80% '\
                 '-fuzz 10% -layers Optimize {0}/*jpg {1}'.format(out_dir,
                                                                  animated_gif)
             os.system(cmd)
