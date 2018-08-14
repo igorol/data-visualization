@@ -3,11 +3,6 @@
 
 ## `temperature_histograms`:
 
-Monthly Anomalies displayed on histograms highlighting the increase of
-  extreme hot data points
+Monthly Anomalies displayed on histograms highlighting the increase of extreme hot data points
 
-  Data provided by Berkley Earth: (http://berkeleyearth.org/data/)
-
-## Output:
-
-<img src="https://raw.githubusercontent.com/igorol/data-visualization/master/temperature_histograms/histogram.gif" width="680" height="420" />
+See plot [documentation](https://github.com/igorol/data-visualization/blob/master/temperature_histograms/README.md)
