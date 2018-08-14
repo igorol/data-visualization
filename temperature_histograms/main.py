@@ -34,7 +34,7 @@ def download_input():
 
         logger.debug('saving file : %s', fn)
         try:
-            with open('{}/{}'.format(savedir, fn), 'wb') as f:
+            with open('{}'.format(fn), 'wb') as f:
                 for chunk in r.iter_content(chunk_size=1024):
                     if chunk:  # filter out keep-alive new chunks
                         f.write(chunk)
