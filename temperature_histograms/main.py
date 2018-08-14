@@ -1,9 +1,9 @@
-"""Visualization of Climate Change extremes via histograms."""
+"""Visualization of temperature extremes via histograms."""
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 import logging
-from matplotlib.font_manager import FontProperties
-from matplotlib.patches import Rectangle, Shadow
+from matplotlib.patches import Patch
+from matplotlib.patches import Rectangle
 import matplotlib.pyplot as plt
 import numpy as np
 import os
@@ -48,10 +48,8 @@ def download_input():
     return fn
 
 
-def make_plots(fn, animated_gif='giss_histogram.gif',
-               start='185001', end='201801'):
+def make_plots(fn, animated_gif='histogram.gif', start='185001', end='201801'):
     """Create Histograms plot."""
-
     # plot parameters
     n_bins = 400
     left_line = -2.5
@@ -69,9 +67,7 @@ def make_plots(fn, animated_gif='giss_histogram.gif',
         os.unlink(file)
     num_cold_points = 0.
     num_hot_points = 0.
-    font = FontProperties()
-    font.set_weight('bold')
-
+    plt.rcParams['font.weight'] = 'bold'
     # plot code
     ds = xr.open_dataset(fn)
     d0 = datetime(1850, 1, 1)
@@ -147,9 +143,9 @@ def make_plots(fn, animated_gif='giss_histogram.gif',
         # some labeling
         plt.ylabel('Frequency of ocurrence')
         plt.xlabel('Temperature Anomalies ($^\circ$C)')
-        title = 'Monthly Temp Histogram - Data: Berkley Earth'
+        title = 'Monthly Temp Histogram \n Data: Berkley Earth'
         plt.title(title)
-        plt.text(min_val + 0.75, 0.9, month.strftime('%Y'),
+        plt.text(min_val + 0.8, 0.9, month.strftime('%Y'),
                  weight='bold', fontsize=24)
         plt.text(min_val + 0.1, 0.9, month.strftime('%b'),
                  fontsize=10)
@@ -157,46 +153,32 @@ def make_plots(fn, animated_gif='giss_histogram.gif',
         # counting and ploting frequency bars
         num_cold_points += data[np.where(data < left_line)].shape[0]
         num_hot_points += data[np.where(data > right_line)].shape[0]
-        fraction_cold = num_cold_points / data.shape[0]
-        fraction_hot = num_hot_points / data.shape[0]
-        cold_bar = Rectangle((-5, 0), 0.75, fraction_cold/100, linewidth=1,
-                             edgecolor='white', facecolor=cold_color,
-                             zorder=1)
-        currentAxis = plt.gca()
-        currentAxis.add_patch(cold_bar)
+        pie_slices = [num_cold_points, num_hot_points]
+        pie_colors = [cold_color, hot_color]
 
-        hot_bar = Rectangle((4, 0), 0.75, fraction_hot/100, linewidth=1,
-                            edgecolor='white', facecolor=hot_color,
-                            zorder=1)
-        currentAxis = plt.gca()
-        currentAxis.add_patch(hot_bar)
-        plt.text(min_val + 0.1, fraction_cold/100 + 0.12,
-                 'Cold Events \nFrequency', fontsize=14,
-                 color=cold_color, weight='bold')
-        plt.text(min_val + 0.1, fraction_cold/100 + 0.04,
-                 '{0:.2f}%'.format(fraction_cold), fontsize=14,
-                 color=cold_color, weight='bold')
+        hot_patch = Patch(color=hot_color, label='Warm Events')
+        cold_patch = Patch(color=cold_color, label='Cold Events')
+        plt.legend(handles=[hot_patch, cold_patch], loc='upper right')
 
-        plt.text(right_line + 0.1, fraction_hot/100 + 0.12,
-                 'Hot Events \nFrequency', fontsize=14,
-                 color=hot_color, weight='bold')
-        plt.text(right_line + 0.1, fraction_hot/100 + 0.04,
-                 '{0:.2f}%'.format(fraction_hot), fontsize=14,
-                 color=hot_color, weight='bold')
+        plt.axes([.09, .31, .3, .3], facecolor='k')
+        plt.pie(pie_slices, colors=pie_colors,
+                autopct='%1.1f%%', startangle=90.)
+        plt.title('Accumulated \nFrequencies')
+        plt.axis('equal')
 
-        out_name = 'plot_{0:07d}.png'.format(t)
+        out_name = 'plot_{0:04d}.jpg'.format(t)
         plt.figimage(wallpaper, 0, 0, alpha=0.9, zorder=0, resize=(800, 600))
-        plt.legend(loc='upper right', frameon=False)
         plt.savefig('{}/{}'.format(out_dir, out_name), transparent=True,
                     dpi=80, rasterized=True)
-        # break
 
     # anim stuff
     if animated_gif:
         logger.info('Generating animated gif %s', animated_gif)
+        num_imgs = end_idx - start_idx
         try:
-            cmd = 'convert -delay 10 -loop 0 -geometry 680x420 '\
-                '{0}/*png {1}'.format(out_dir, animated_gif)
+            cmd = 'convert -delay 10 -loop 0 -duplicate 24,{0}'\
+                '-geometry 680x420 {1}/*jpg {2}'.format(num_imgs, out_dir,
+                                                        animated_gif)
             os.system(cmd)
         except Exception as exc:
             logger.error('Unable to generate gif. Exception = %s', exc)
